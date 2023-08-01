@@ -201,7 +201,7 @@ export const taskController = {
       const currentDate = Date.now();
 
       const tasks = await Task.find({
-        $and: [{ status: { $ne: "done" } }, { deadline: { $gt: currentDate } }],
+        $and: [{ status: { $ne: "done" } }, { deadline: { $lt: currentDate } }],
       });
 
       return res.json({
