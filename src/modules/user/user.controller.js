@@ -1,7 +1,10 @@
 import { User } from "../../../database/models/user.model.js";
-import { generateAuthToken } from "../../utils/authToken.js";
+import jwt from "jsonwebtoken";
 import { comparePasswords, hashPassword } from "../../utils/password.js";
 import { BlacklistedToken } from "../../../database/models/blackList.model.js";
+import { verifyEmail } from "../../utils/email/nodemailer.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 export const userController = {
   // 1-signUp
@@ -31,6 +34,9 @@ export const userController = {
         phone,
       });
 
+      const token = jwt.sign({ email }, process.env.VERIFY_EMAIL_KEY);
+      verifyEmail({ email, token });
+
       return res.json({
         status: "success",
         message: "User created successfully",
@@ -45,6 +51,34 @@ export const userController = {
     }
   },
 
+  // verify Email
+  verifyEmail: (req, res) => {
+    const { token } = req.params;
+    jwt.verify(token, process.env.VERIFY_EMAIL_KEY, async (error, decoded) => {
+      if (error) {
+        return res.json({
+          status: "failed",
+          message: "Invalid token",
+          error,
+        });
+      }
+
+      const verifiedUser = await User.findOneAndUpdate(
+        { email: decoded.email },
+        { verified: true },
+        { new: true }
+      );
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      const htmlFilePath = path.join(
+        __dirname,
+        "../../view/verifySuccess.html"
+      );
+
+      verifiedUser && res.sendFile(htmlFilePath);
+    });
+  },
+
   // 2-login-->with create token
   logIn: async (req, res) => {
     try {
@@ -56,7 +90,10 @@ export const userController = {
       });
 
       if (user && comparePasswords(password, user.password)) {
-        const token = generateAuthToken(user._id, user.name);
+        const token = jwt.sign(
+          { id: user._id, name: user.name },
+          process.env.SECRET_KEY
+        );
 
         return res.json({
           status: "success",

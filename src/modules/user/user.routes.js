@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { userController } from "./user.controller.js";
 import { auth } from "../../middleware/auth.js";
-import { User } from "../../../database/models/user.model.js";
 
 const router = Router();
 
@@ -9,6 +8,9 @@ export default router;
 
 // 1-signUp
 router.post("/signup", userController.signUp);
+
+// verify email
+router.get("/verify/:token", userController.verifyEmail);
 
 // 2-login-->with create token
 router.post("/login", userController.logIn);
