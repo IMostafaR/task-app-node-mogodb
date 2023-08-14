@@ -34,8 +34,16 @@ export const userController = {
         phone,
       });
 
-      const token = jwt.sign({ email }, process.env.VERIFY_EMAIL_KEY);
-      verifyEmail({ email, token });
+      const token = jwt.sign({ email }, process.env.VERIFY_EMAIL_KEY, {
+        expiresIn: 60 * 5,
+      });
+
+      verifyEmail({
+        email,
+        token,
+        protocol: req.protocol,
+        host: req.headers.host,
+      });
 
       return res.json({
         status: "success",
@@ -87,6 +95,7 @@ export const userController = {
       const user = await User.findOne({
         email,
         deactivated: false,
+        verified: true,
       });
 
       if (user && comparePasswords(password, user.password)) {

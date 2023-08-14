@@ -4,12 +4,15 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      required: true,
     },
     email: {
       type: String,
+      required: true,
     },
     password: {
       type: String,
+      required: true,
     },
     age: { type: Number },
     gender: { type: String, enum: ["male", "female"] },
@@ -20,7 +23,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    verified: {
+    verifiedEmail: {
       type: Boolean,
       default: false,
     },
