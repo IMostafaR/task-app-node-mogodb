@@ -4,8 +4,6 @@ import { auth } from "../../middleware/auth.js";
 
 const router = Router();
 
-export default router;
-
 // 1-signUp
 router.post("/signup", userController.signUp);
 
@@ -29,3 +27,5 @@ router.put("/deactivate", auth, userController.deactivateUser);
 
 // 7-logout
 router.post("/logout", auth, userController.logout);
+
+export default router;
