@@ -26,30 +26,53 @@ This is a Node.js application built with Express.js, Mongoose, and MongoDB, foll
 
 The project is structured as follows:
 
+### root directory
+
 - `index.js`: The main entry point of the application.
-- `.env`: Configuration file to store environment variables.
-- `database/`: Directory containing database-related files.
-  - `models/`: Directory containing Mongoose models for the application.
-    - `blackList.model.js`: Mongoose model for blacklisted tokens.
-    - `task.model.js`: Mongoose model for tasks.
-    - `user.model.js`: Mongoose model for users.
-  - `connection.js`: File for establishing the connection to the MongoDB database.
-- `src/`: Directory containing the source code of the application.
-  - `middleware/`: Directory containing custom middleware functions.
+
+### database directory
+
+Directory containing database-related files.
+
+- `models/`: Directory containing Mongoose models for the application.
+  - `blackList.model.js`: Mongoose model for blacklisted tokens.
+  - `task.model.js`: Mongoose model for tasks.
+  - `user.model.js`: Mongoose model for users.
+- `connection.js`: File for establishing the connection to the MongoDB database.
+
+### src directory
+
+Directory containing the source code of the application.
+
+- `middleware/`: Directory containing custom middleware functions.
+  - `auth/`: Directory for authentication-related middleware.
     - `auth.js`: Middleware for user authentication using JWT tokens.
-    - `checkAssignTo.js`: Middleware to check if the assigned user exists when adding a task.
-  - `modules/`: Directory containing modules for different functionalities.
-    - `user/`: Directory for user-related functionalities.
-      - `user.controller.js`: Controller for handling user-related operations.
-      - `user.routes.js`: Express routes for user endpoints.
-    - `task/`: Directory for task-related functionalities.
-      - `task.controller.js`: Controller for handling task-related operations.
-      - `task.routes.js`: Express routes for task endpoints.
-  - `utils/`: Directory containing utility functions.
-    - `authToken.js`: Utility function to generate JWT tokens for user authentication.
-    - `password.js`: Utility functions for hashing and comparing passwords.
-    - `pushTasks.js`: Utility functions for updating task lists of users.
-  - `router.js`: File containing the main Express router and connecting all the routes.
+  - `error/`: Directory for error handling middleware.
+    - `globalErrorHandler.js`: Middleware for handling global errors.
+  - `validation/`: Directory for validation-related middleware.
+    - `validation.js`: Middleware for validating request data using `Joi`.
+  - `checkAssignTo.js`: Middleware to check if the assigned user exists when adding a task.
+- `modules/`: Directory containing modules for different functionalities.
+  - `user/`: Directory for user-related functionalities.
+    - `user.controller.js`: Controller for handling user-related operations.
+    - `user.routes.js`: Express routes for user endpoints.
+    - `user.validator.js`: Joi validation schema for user-related operations.
+  - `task/`: Directory for task-related functionalities.
+    - `task.controller.js`: Controller for handling task-related operations.
+    - `task.routes.js`: Express routes for task endpoints.
+    - `task.validator.js`: Joi validation schema for task-related operations.
+- `utils/`: Directory containing utility functions.
+  - `email/`: Directory for email utility functions.
+    - `nodemailer.js`: Utility for sending email using Nodemailer.
+  - `error/`: Directory for error utility functions.
+    - `appError.js`: Custom error class.
+    - `catchAsyncError.js`: Utility for catching and handling async errors.
+  - `password.js`: Utility functions for hashing and comparing passwords.
+  - `pushTasks.js`: Utility functions for updating task lists of users.
+- `view/`: Contains view-related files.
+  - `verifyEmail.js`: HTML template for email verification.
+  - `verifySuccess.html`: HTML file for success message after email verification.
+- `router.js`: File containing the main Express router and connecting all the routes.
 
 ---
 
