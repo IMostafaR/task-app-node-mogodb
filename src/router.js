@@ -5,6 +5,13 @@ import { AppError } from "./utils/error/appError.js";
 import { globalErrorHandler } from "./middleware/error/globalErrorHandler.js";
 
 export const router = (app, express) => {
+  process.on("unhandledRejection", (error) => {
+    console.error("Error: ", error);
+  });
+  process.on("uncaughtException", (error) => {
+    console.error("Error: ", error);
+  });
+
   db();
   app.use(express.json());
   app.use("/api/v1/user", userRouter);
