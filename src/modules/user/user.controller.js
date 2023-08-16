@@ -6,21 +6,18 @@ import { verifyEmail } from "../../utils/email/nodemailer.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { catchAsyncError } from "../../utils/error/catchAsyncError.js";
+import { AppError } from "../../utils/error/appError.js";
 
 export const userController = {
   // 1-signUp
-  signUp: catchAsyncError(async (req, res) => {
+  signUp: catchAsyncError(async (req, res, next) => {
     const { firstName, lastName, email, password, age, gender, phone } =
       req.body;
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res.json({
-        status: "failed",
-        message: "Email already exists",
-        email,
-      });
+      return next(new AppError(`Email already exists`, 409));
     }
 
     const hashedPassword = hashPassword(password);
@@ -52,15 +49,11 @@ export const userController = {
     });
   }),
   // verify Email
-  verifyEmail: (req, res) => {
+  verifyEmail: (req, res, next) => {
     const { token } = req.params;
     jwt.verify(token, process.env.VERIFY_EMAIL_KEY, async (error, decoded) => {
       if (error) {
-        return res.json({
-          status: "failed",
-          message: "Invalid token",
-          error,
-        });
+        return next(new AppError(`Invalid token`, 401));
       }
 
       const verifiedUser = await User.findOneAndUpdate(
@@ -80,7 +73,7 @@ export const userController = {
   },
 
   // 2-login-->with create token
-  logIn: catchAsyncError(async (req, res) => {
+  logIn: catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({
@@ -102,23 +95,17 @@ export const userController = {
       });
     }
 
-    return res.json({
-      status: "failed",
-      message: "incorrect email or password",
-    });
+    return next(new AppError(`incorrect email or password`, 401));
   }),
   // 3-change password (user must be logged in)
-  changePassword: catchAsyncError(async (req, res) => {
+  changePassword: catchAsyncError(async (req, res, next) => {
     const { oldPassword, newPassword } = req.body;
 
-    if (oldPassword == newPassword) {
-      return res.json({
-        status: "failed",
-        message: "new password should be different",
-      });
-    }
-
     const user = await User.findById(req.id);
+
+    if (user && comparePasswords(newPassword, user.password)) {
+      return next(new AppError(`new password should be different`, 409));
+    }
 
     if (user && comparePasswords(oldPassword, user.password)) {
       const hashedPassword = hashPassword(newPassword);
@@ -138,13 +125,10 @@ export const userController = {
       });
     }
 
-    return res.json({
-      status: "failed",
-      message: "Incorrect old password",
-    });
+    return next(new AppError(`Incorrect old password`, 422));
   }),
   // 4-update user (age , firstName , lastName)(user must be logged in)
-  updateUser: catchAsyncError(async (req, res) => {
+  updateUser: catchAsyncError(async (req, res, next) => {
     const { firstName, lastName, age } = req.body;
     const updates = {};
 
@@ -169,10 +153,7 @@ export const userController = {
     }
 
     if (!Object.keys(updates).length) {
-      return res.json({
-        status: "failed",
-        message: "there's no data to be updated",
-      });
+      return next(new AppError(`there's no data to be updated`, 400));
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.id, updates, {
@@ -186,13 +167,9 @@ export const userController = {
         updatedUser,
       });
     }
-    return res.json({
-      status: "failed",
-      message: "Updating data failed",
-    });
   }),
   // 5-delete user(user must be logged in)
-  deleteUser: catchAsyncError(async (req, res) => {
+  deleteUser: catchAsyncError(async (req, res, next) => {
     const deletedUser = await User.findByIdAndDelete(req.id);
 
     if (deletedUser) {
@@ -203,13 +180,9 @@ export const userController = {
         email: deletedUser.email,
       });
     }
-    return res.json({
-      status: "failed",
-      message: "no user has been deleted",
-    });
   }),
   // 6-soft delete(user must be logged in)
-  deactivateUser: catchAsyncError(async (req, res) => {
+  deactivateUser: catchAsyncError(async (req, res, next) => {
     const deactivatedUser = await User.findByIdAndUpdate(
       req.id,
       {
@@ -228,13 +201,9 @@ export const userController = {
         deactivatedUser,
       });
     }
-    return res.json({
-      status: "failed",
-      message: "Deactivation failed",
-    });
   }),
   // 7-logout
-  logout: catchAsyncError(async (req, res) => {
+  logout: catchAsyncError(async (req, res, next) => {
     const token = req.headers.token;
     await BlacklistedToken.create({ token });
 

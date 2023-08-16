@@ -1,31 +1,27 @@
 import jwt from "jsonwebtoken";
 import { BlacklistedToken } from "../../database/models/blackList.model.js";
+import { catchAsyncError } from "../utils/error/catchAsyncError.js";
+import { AppError } from "../utils/error/appError.js";
 
-export const auth = async (req, res, next) => {
-  try {
-    const token = req.headers.token;
+export const auth = catchAsyncError(async (req, res, next) => {
+  const token = req.headers.token;
 
-    const jwtBlacklist = await BlacklistedToken.findOne({ token });
-    if (jwtBlacklist) {
-      return res.json({
-        status: "failed",
-        message:
-          "Unauthorized - Token is revoked or invalid. Please try to login again",
-      });
+  const jwtBlacklist = await BlacklistedToken.findOne({ token });
+  if (jwtBlacklist) {
+    return next(
+      new AppError(
+        `Unauthorized - Token is revoked or invalid. Please try to login again`,
+        401
+      )
+    );
+  }
+
+  jwt.verify(token, process.env.SECRET_KEY, (error, decoded) => {
+    if (error) {
+      return next(new AppError(`Invalid token`, 401));
     }
 
-    jwt.verify(token, process.env.SECRET_KEY, (error, decoded) => {
-      if (error) {
-        return res.json({
-          status: "failed",
-          message: "Invalid token",
-        });
-      }
-
-      req.id = decoded.id;
-      next();
-    });
-  } catch (error) {
-    return res.json({ status: "error", message: "server error", error });
-  }
-};
+    req.id = decoded.id;
+    next();
+  });
+});

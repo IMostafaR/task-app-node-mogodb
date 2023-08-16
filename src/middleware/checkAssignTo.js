@@ -1,27 +1,22 @@
 import { User } from "../../database/models/user.model.js";
+import { AppError } from "../utils/error/appError.js";
+import { catchAsyncError } from "../utils/error/catchAsyncError.js";
 
-export const isExist = async (req, res, next) => {
-  try {
-    const { assignTo } = req.body;
+export const isExist = catchAsyncError(async (req, res, next) => {
+  const { assignTo } = req.body;
 
-    if (assignTo) {
-      let user = await User.findById(assignTo);
+  if (assignTo) {
+    let user = await User.findById(assignTo);
 
-      if (!user) {
-        return res.json({
-          status: "failed",
-          message: "The user you're trying to assign a task to isn't exist",
-        });
-      }
+    if (!user) {
+      return next(
+        new AppError(
+          `The user you're trying to assign a task to isn't exist`,
+          404
+        )
+      );
     }
-  } catch (error) {
-    console.log(error);
-    return res.json({
-      status: "error",
-      message: "server error",
-      error,
-    });
   }
 
   next();
-};
+});
