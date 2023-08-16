@@ -103,6 +103,10 @@ export const userController = {
 
     const user = await User.findById(req.id);
 
+    if (!user) {
+      return next(new AppError(`UserId isn't found`, 404));
+    }
+
     if (user && comparePasswords(newPassword, user.password)) {
       return next(new AppError(`new password should be different`, 409));
     }
@@ -167,6 +171,7 @@ export const userController = {
         updatedUser,
       });
     }
+    return next(new AppError(`UserId isn't found`, 404));
   }),
   // 5-delete user(user must be logged in)
   deleteUser: catchAsyncError(async (req, res, next) => {
@@ -180,6 +185,7 @@ export const userController = {
         email: deletedUser.email,
       });
     }
+    return next(new AppError(`UserId isn't found`, 404));
   }),
   // 6-soft delete(user must be logged in)
   deactivateUser: catchAsyncError(async (req, res, next) => {
@@ -201,6 +207,8 @@ export const userController = {
         deactivatedUser,
       });
     }
+
+    return next(new AppError(`UserId isn't found`, 404));
   }),
   // 7-logout
   logout: catchAsyncError(async (req, res, next) => {

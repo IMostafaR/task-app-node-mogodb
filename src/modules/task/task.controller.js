@@ -11,17 +11,21 @@ import {
 export const taskController = {
   // 1-add task with status (toDo)(user must be logged in)
   addTask: catchAsyncError(async (req, res, next) => {
-    const { assignTo, title, description, deadlineInDays } = req.body;
-    const createdBy = req.id;
-    const assignedTo = assignTo || createdBy; // if no assignTo it will be createdBy
+    const { assignTo, title, description, deadlineDate } = req.body;
+    const loggedInUser = req.id;
+    const assignedTo = assignTo || loggedInUser;
 
     const currentDate = Date.now();
-    const deadline = new Date(
-      currentDate + deadlineInDays * 24 * 60 * 60 * 1000
-    ); // 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
+    const deadline = new Date(deadlineDate);
+
+    if (currentDate > deadline) {
+      return next(
+        new AppError("Sorry, deadline cannot be assigned to past date", 422)
+      );
+    }
 
     const newTask = await Task.create({
-      createdBy,
+      createdBy: loggedInUser,
       assignTo: assignedTo,
       title,
       description,
@@ -29,8 +33,8 @@ export const taskController = {
     });
 
     if (newTask) {
-      const ownerStatus = await pushTaskOwner(newTask._id, createdBy);
-      const assignStatus = await pushTaskAssigned(newTask._id, assignTo);
+      const ownerStatus = pushTaskOwner(newTask._id, loggedInUser);
+      const assignStatus = pushTaskAssigned(newTask._id, assignedTo);
 
       return res.json({
         status: "success",

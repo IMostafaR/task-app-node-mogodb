@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import { BlacklistedToken } from "../../database/models/blackList.model.js";
-import { catchAsyncError } from "../utils/error/catchAsyncError.js";
-import { AppError } from "../utils/error/appError.js";
+import { BlacklistedToken } from "../../../database/models/blackList.model.js";
+import { AppError } from "../../utils/error/appError.js";
+import { catchAsyncError } from "../../utils/error/catchAsyncError.js";
 
 export const auth = catchAsyncError(async (req, res, next) => {
   const token = req.headers.token;

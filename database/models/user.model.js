@@ -4,19 +4,21 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Name is required"],
+      minLength: [3, "Name is too short"],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "Password is required"],
+      minLength: [8, "Password should not be less than 8 characters"],
     },
-    age: { type: Number },
+    age: { type: Number, min: [5], max: [100] },
     gender: { type: String, enum: ["male", "female"] },
     phone: { type: String },
     createdTasks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Task" }],
