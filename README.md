@@ -324,71 +324,91 @@ The server will start running on `http://localhost:3000`.
 
 # Middleware
 
+In this section, I'll cover the middleware components used in the application. Middleware functions are used to perform various tasks such as authentication, validation, error handling, and more.
+
 ## Authentication Middleware
 
 **File: auth.js**
 
-**Description:** Verifies the validity of a JWT token passed in the request headers. It checks if the token is blacklisted or invalid and adds the decoded user ID to the request for authenticated routes.
+**Description:** This middleware function verifies the validity of a JWT token passed in the request headers. It checks if the token is blacklisted or invalid and adds the decoded user ID to the request for authenticated routes. It is used to ensure that only authorized users can access certain endpoints.
 
 ## Check AssignTo Middleware
 
 **File: checkAssignTo.js**
 
-**Description:** Validates if the provided `assignTo` user ID exists in the database when creating or updating a task.
+**Description:** This middleware function validates the existence of the `assignTo` user ID in the request body when creating or updating a task. It checks if the specified user ID corresponds to an existing user in the database. This helps ensure that tasks can only be assigned to valid users.
+
+## Error Handling Middleware
+
+**File: globalErrorHandler.js**
+
+**Description:** This middleware function handles global errors that occur during the request-response cycle. It captures and processes errors, sending appropriate responses based on the error status code. This ensures consistent and user-friendly error handling across different parts of the application.
+
+## Validation Middleware
+
+**File: validation.js**
+
+**Description:** This middleware function validates incoming request data and headers using Joi schemas. It checks the integrity of data provided in the request body, parameters, query parameters, and headers. This helps maintain data consistency and ensures that only valid data is processed by the application.
+
+Feel free to explore these middleware components and their implementations in the source code to get a better understanding of how they contribute to the functionality and security of the application.
 
 ---
 
 # Utilities
 
-## Authentication Token Utility
+In this section, I'll explore the utility functions that enhance the functionality and maintainability of the application.
 
-**File: authToken.js**
+## Nodemailer Utility
 
-**Description:** Provides function to generate JWT tokens using the `jsonwebtoken` library. JWT tokens are used for user authentication and authorization in the application. The utility includes the following function:
+**File: nodemailer.js**
 
-- `generateAuthToken(payload)`: This function takes a `payload` as input, which typically includes the user ID and any additional data to be stored in the token. It generates a new JWT token with the provided payload and returns the token as a string.
+**Description:** This utility module handles sending verification emails to users for email confirmation. It uses the Nodemailer module to create and send emails. The `verifyEmail` function takes an `option` object as input, which includes the user's email, protocol, host, and verification token. The function generates and sends an email with a verification link.
+
+## Custom Error Class
+
+**File: appError.js**
+
+**Description:** This utility module defines a custom `AppError` class that extends the JavaScript `Error` class. It allows you to create custom error instances with an associated status code. This is useful for consistent and structured error handling throughout the application, providing detailed error messages and status codes.
+
+## Catch Async Error Utility
+
+**File: catchAsyncError.js**
+
+**Description:** This utility module provides a higher-order function `catchAsyncError` that simplifies error handling in asynchronous route handlers. It wraps asynchronous functions, catching any errors and passing them to the global error handler middleware. This ensures that errors occurring in asynchronous functions are properly handled and don't crash the application.
 
 ## Password Hashing Utility
 
 **File: password.js**
 
-**Description:** Provides functions to hash and verify user passwords using the `bcryptjs` library. Hashing passwords is essential for securely storing user credentials in the database. The utility includes the following functions:
-
-- `hashPassword(plainPassword)`: This function takes a `plainPassword` as input and generates a salted hash of the password using bcrypt. The resulting hash can be safely stored in the database.
-
-- `comparePasswords(plainPassword, hashedPassword)`: This function takes a `plainPassword` and a `hashedPassword` as inputs. It compares the `plainPassword` with the `hashedPassword` by performing a hash operation on the `plainPassword` and checking if it matches the `hashedPassword`. It returns `true` if the passwords match, indicating a successful verification.
+**Description:** This utility module contains functions for hashing and comparing passwords. The `hashPassword` function securely hashes a plain password using the `bcrypt` library with a specified number of salt rounds. The `comparePasswords` function compares a plain password with a hashed password, verifying the password's validity.
 
 ## Push and Update Tasks Utility
 
 **File: pushTasks.js**
 
-**Description:**
+**Description:** This utility module provides functions for updating the task lists of users when tasks are created, updated, or deleted. The functions ensure that task IDs are appropriately added or removed from the `createdTasks` and `assignedTasks` arrays of users, maintaining task ownership and assignments.
 
-**pushTaskOwner(taskId, createdBy)**
+These utility functions contribute to the overall efficiency, security, and reliability of the application's various features.
 
-Pushes a new task to the `createdTasks` array of the owner.
+---
 
-- `taskId`: ID of the new task to add.
-- `createdBy`: ID of the user who created the task.
+# Views
 
-**pushTaskAssigned(taskId, assignTo)**
+The "views" directory contains HTML templates for rendering different email templates in a visually appealing manner. These templates are used for various email communication purposes within the application.
 
-Pushes a new task to the `assignedTasks` array of the assigned user.
+## Email Verification Template
 
-- `taskId`: ID of the new task to add.
-- `assignTo`: ID of the user to whom the task is assigned.
+**File: verifyEmail.js**
 
-**updateOwnerTasksList(loggedInUser)**
+**Description:** This HTML template is used for sending an email verification link to users during the registration process. The `verifyEmailHtml` function generates an HTML email that includes a verification link. The link leads the user to the email verification page in the application, where their email address can be verified.
 
-Updates the `createdTasks` list of the owner after task updates or deletions.
+## Email Verification Success Template
 
-- `loggedInUser`: ID of the owner user whose `createdTasks` list needs to be updated.
+**File: verifySuccess.html**
 
-**updateAssignedTasksList(assignedTo)**
+**Description:** This HTML template is used to display a success message after a user's email address is successfully verified.
 
-Updates the `assignedTasks` list of the assigned user after task updates or deletions.
-
-- `assignedTo`: ID of the user whose `assignedTasks` list needs to be updated.
+These view templates contribute to the overall user experience by providing visually appealing and informative email communications throughout the application.
 
 ---
 
